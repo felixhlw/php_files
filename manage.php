@@ -14,8 +14,7 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
     $notes= $_POST['notes'];
     echo "$notes";
     $type= $_FILES['file']['type'];
-    $origin_name=$_FILES['file']['name'];
-    $save_name=md5(time().$_FILES['file']['name']);
+    $filename=$_FILES['file']['name'];
     switch($_FILES['file']['type']){
         case "image/jpeg":
             $subname=".jpg";
@@ -29,11 +28,12 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
         default:
             $subname=".others";
     }
-    $path="./upload/" . $save_name.$subname;
+    $path="./upload/";
+    $imgfile="./upload/" . $filename;
     
-    move_uploaded_file($_FILES['file']['tmp_name'], $path);
+    move_uploaded_file($_FILES['file']['tmp_name'], $path . $filename);
      
-    $sql="insert into files (`name`,`type`,`notes`,`path`) values ('$origin_name','$type','$notes','$path')";    
+    $sql="insert into files (`name`,`type`,`notes`,`path`) values ('$filename','$type','$notes','$path')";    
     
     $result=$pdo->exec($sql);
     if ($result==1) {
@@ -70,7 +70,8 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
 
 <form action="manage.php" method="post" enctype="multipart/form-data">
 檔案：<input type="file" name="file" ><br>
-說明：<input type="text" name="notes" id="notes"><br> <!-- 注意:要有text 的type，才會有post資訊喔 -->
+標題：<input type="textarea" name="notes" id="notes"><br> <!-- 注意:要有text 的type，才會有post資訊喔 -->
+說明<textarea name="" id="" cols="30" rows="5"></textarea>
 <input type="submit" value="上傳">
 <br><br>
 </form>
@@ -100,7 +101,7 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
         <td><?=$file['id'];?></td>
         <td><?=$file['name'];?></td>
         <td><?=$file['type'];?></td>
-        <td><img src="<?=$file['path'];?>" style="width:80px ;height:auto;"></td>
+        <td><img src="<?=$file['path'] . $file['name'] ;?>" style="width:80px ;height:auto;"></td>
         <td><?=$file['path'];?></td>
         <td><?=$file['notes'];?></td>
         <td><?=$file['create_time'];?></td>

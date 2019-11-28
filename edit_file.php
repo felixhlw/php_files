@@ -1,69 +1,72 @@
-<link rel="stylesheet" href="style.css">
+
+  
 <?php
+include_once "base.php";
+if(!empty($_POST)){  
+/*     if(isset($_FILES['file']) && !empty($_POST) && !empty($_POST['notes'])) { */
+        /* if(!empty($_POST) && !empty($_FILES) ){  */   
+            $id=$_POST['id'];
+            $notes=$_POST['notes'];
+            $sql="select * from files where id='$id'";
+            $origin=$pdo->query($sql)->fetch();
+            $origin_path=$origin['path'];
+            $origin_file=$origin['name'];
+            if (!empty($_FILES['file'])) {
+                
+                if (!empty($_FILES['file']['name'])) {
+                    $filename=$_FILES['file']['name'];
+                    $type=$_FILES['file']['type'];
+                }else{
+                    $filename=$origin_file;
+                    $type=$origin['type'];
+                }
+                $path="./upload/";
+                $updateTime=date("Y-m-d H:i:s");
+                move_uploaded_file($_FILES['file']['tmp_name'] , $path.$filename );
+                //刪除原本的檔案
+                //unlink($origin_file);
+                //更新資料
+                $sql="update files set name='$filename',type='$type',update_time='$updateTime',path='$path',notes='$notes' where id='$id'";
+            }else{
+                $type=$origin['type'];
+                $filename=$origin['name'];
+                $path=$origin['path'];
+                $updateTime=date("Y-m-d H:i:s");
+                $sql="update files set update_time='$updateTime',path='$path',notes='$notes' where id='$id'";
 
+            }
+            $result=$pdo->exec($sql);
+            if($result==1){
+                echo "更新成功";
+                header("location:manage.php");
+            }else{
+                echo "DB有誤";
+            }
+        
+ 
 
-$dsn="mysql:host=localhost;charset=utf8;dbname=upload";
-$pdo=new PDO($dsn,"root","");
+        }
 
-if (!empty($_POST)  ) {
-/* if (!empty($_FILES) && $_FILES['file']['error']==0 ) { */
-
-    $notes= $_POST['notes'];
-    $type=$_FILES['file']['type'];
-/*     $filename=$_FILES['file']['name'];  */
-/*     $origin_name=$_FILES['file']['name'];
-    $save_name=md5(time().$_FILES['file']['name']);     */
-/*     $path="./upload/";  */
-    $updateTime=date("Y-m-d H:i:s");
-    $origin_name=$_FILES['file']['name'];
-    $save_name=md5(time().$_FILES['file']['name']);
-    switch($_FILES['file']['type']){
-        case "image/jpeg":
-            $subname=".jpg";
-        break;
-        case "image/png":
-            $subname=".png";
-        break;
-        case "image/gif":
-            $subname=".gif";
-        break;
-        default:
-            $subname=".others";
-    }
-    $path="./upload/".$save_name.$subname;    
-    $id=$_POST['id'];
-    move_uploaded_file($_FILES['file']['tmp_name'] , $path);
-    
-    //刪原有檔案
-    $sql="select * from files where id='$id'";
-    $origin=$pdo->query($sql)->fetch();
-    $origin_file=$origin['path'];
-    unlink($origin_file);  // --> delete電腦中的檔案
-
-
-    //更新資料
-    $sql="update files set name='$origin_name', type='$type',update_time='$updateTime', notes='$notes', path='$path' where id='$id'" ;
-
-    $result=$pdo->exec($sql);
-    if ($result==1) {
-        echo "資料上傳成功";
-        header("location:manage.php");
-    }else{
-        echo"DB有誤";
-    }
-}
-
-    $id=$_GET['id'];  //取得隱藏傳回的id值
-    $sql="select * from files where id='$id'";
-    $data=$pdo->query($sql)->fetch();
-
+$id=$_GET['id'];
+$sql="select * from files where id='$id'";
+$data=$pdo->query($sql)->fetch();
 ?>
-<form action="edit_file.php" method="post" enctype="multipart/form-data">
+<style>
+table{
+  border-collapse:collapse;
+}
+td{
+  padding:5px;
+  border:1px solid #ccc;
+}
+</style>
+<form action="edit_file.php?id=<?=$data['id'];?>" method="post" enctype="multipart/form-data">
 <table>
     <tr>
-        <td colspan=2>
-        <img src="<?=$data['path'];?>" style="width:200px;height:auto">
+        <td colspan="2">
+            <img src="<?=$data['path'].$data['name'];?>" style="width:200px;height:200px">
         </td>
+
     </tr>
     <tr>
         <td>name</td>
@@ -78,17 +81,13 @@ if (!empty($_POST)  ) {
         <td><?=$data['type'];?></td>
     </tr>
     <tr>
-        <td>說明</td>
-        <td><?=$data['notes'];?></td>
-    </tr>
-    <tr>
         <td>create_time</td>
         <td><?=$data['create_time'];?></td>
     </tr>
-
-</table>
-更新檔案: <input type="file" name="file"><br>
+</table><br>
+更新檔案:<input type="file" name="file"><br><br>
+標題:<input type="text" name="title" value="<?=$data['notes'];?>"><br><br>
+說明:<textarea name="notes" id="notes" cols="30" rows="10"></textarea>
 <input type="hidden" name="id" value="<?=$data['id'];?>">
-說明：<input type="text" name="notes" id="notes" value="<?=$data['notes'];?>"><br>
 <input type="submit" value="更新">
 </form>
