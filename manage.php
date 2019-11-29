@@ -10,7 +10,7 @@ $pdo= new PDO($dsn, "root", "");
 
 
 if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免form 中沒有post的資料 */
-    
+    $title= $_POST['title'];
     $notes= $_POST['notes'];
     echo "$notes";
     $type= $_FILES['file']['type'];
@@ -33,7 +33,7 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
     
     move_uploaded_file($_FILES['file']['tmp_name'], $path . $filename);
      
-    $sql="insert into files (`name`,`type`,`notes`,`path`) values ('$filename','$type','$notes','$path')";    
+    $sql="insert into files (`name`,`type`,`title`,`notes`,`path`) values ('$filename','$type','$title','$notes','$path')";    
     
     $result=$pdo->exec($sql);
     if ($result==1) {
@@ -70,8 +70,8 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
 
 <form action="manage.php" method="post" enctype="multipart/form-data">
 檔案：<input type="file" name="file" ><br>
-標題：<input type="textarea" name="notes" id="notes"><br> <!-- 注意:要有text 的type，才會有post資訊喔 -->
-說明<textarea name="" id="" cols="30" rows="5"></textarea>
+標題：<input type="text" name="title" id="title"><br> <!-- 注意:要有text 的type，才會有post資訊喔 -->
+說明<textarea name="notes" id="" cols="30" rows="5"></textarea>
 <input type="submit" value="上傳">
 <br><br>
 </form>
@@ -87,6 +87,7 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
         <td>type</td>
         <td>縮圖</td>
         <td>path</td>
+        <td>標題</td>
         <td>說明</td>
         <td>create time</td>
         <td>操作</td>
@@ -103,6 +104,7 @@ if (!empty($_FILES) && $_FILES['file']['error']==0) { /*可用這方式避免for
         <td><?=$file['type'];?></td>
         <td><img src="<?=$file['path'] . $file['name'] ;?>" style="width:80px ;height:auto;"></td>
         <td><?=$file['path'];?></td>
+        <td><?=$file['title'];?></td>
         <td><?=$file['notes'];?></td>
         <td><?=$file['create_time'];?></td>
         <td>

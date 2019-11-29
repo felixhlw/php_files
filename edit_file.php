@@ -6,6 +6,7 @@ if(!empty($_POST)){
 /*     if(isset($_FILES['file']) && !empty($_POST) && !empty($_POST['notes'])) { */
         /* if(!empty($_POST) && !empty($_FILES) ){  */   
             $id=$_POST['id'];
+            $title=$_POST['title'];
             $notes=$_POST['notes'];
             $sql="select * from files where id='$id'";
             $origin=$pdo->query($sql)->fetch();
@@ -26,13 +27,13 @@ if(!empty($_POST)){
                 //刪除原本的檔案
                 //unlink($origin_file);
                 //更新資料
-                $sql="update files set name='$filename',type='$type',update_time='$updateTime',path='$path',notes='$notes' where id='$id'";
+                $sql="update files set name='$filename',type='$type',update_time='$updateTime',path='$path',title='$title',notes='$notes' where id='$id'";
             }else{
                 $type=$origin['type'];
                 $filename=$origin['name'];
                 $path=$origin['path'];
                 $updateTime=date("Y-m-d H:i:s");
-                $sql="update files set update_time='$updateTime',path='$path',notes='$notes' where id='$id'";
+                $sql="update files set update_time='$updateTime',path='$path',title='$title',notes='$notes' where id='$id'";
 
             }
             $result=$pdo->exec($sql);
@@ -86,8 +87,8 @@ td{
     </tr>
 </table><br>
 更新檔案:<input type="file" name="file"><br><br>
-標題:<input type="text" name="title" value="<?=$data['notes'];?>"><br><br>
-說明:<textarea name="notes" id="notes" cols="30" rows="10"></textarea>
+標題:<input type="text" name="title" value="<?=$data['title'];?>"><br><br>
+說明:<textarea name="notes" id="notes" cols="30" rows="10"><?=$data['notes'];?></textarea>
 <input type="hidden" name="id" value="<?=$data['id'];?>">
 <input type="submit" value="更新">
 </form>
